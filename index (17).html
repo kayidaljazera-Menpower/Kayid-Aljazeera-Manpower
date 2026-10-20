@@ -824,66 +824,56 @@ h1 span{background:linear-gradient(135deg,var(--gold-3) 0%,var(--gold) 60%);-web
 </div><div class="copyright"><span>© <span id="year"></span> Kayid Aljazeera. All rights reserved.</span><span>Professional workforce solutions · Kingdom of Saudi Arabia</span></div></div></footer>
 <a class="floating-wa" id="whatsappLink" href="#contact" aria-label="Contact by WhatsApp">WhatsApp ↗</a>
 <script>
-/* ---- Lazy Video Loader ---- */
+/* ---- Smart Video Preloader ---- */
 (function(){
-  // IntersectionObserver: load video only when 10% visible
-  var videoObs = new IntersectionObserver(function(entries){
+  var reduced = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+  function playVid(vid){
+    if(!reduced) vid.play().catch(function(){});
+  }
+
+  // Preload video immediately (start buffering even before visible)
+  function eagerPreload(vid){
+    vid.preload = 'metadata';
+    var hlsUrl = vid.getAttribute('data-hls');
+    if(hlsUrl && window.Hls && Hls.isSupported()){
+      var h = new Hls({maxBufferLength:20, startLevel:0, autoStartLoad:true});
+      h.loadSource(hlsUrl);
+      h.attachMedia(vid);
+      vid._hls = h;
+    } else if(hlsUrl && vid.canPlayType('application/vnd.apple.mpegurl')){
+      vid.src = hlsUrl; vid.load();
+    } else {
+      vid.querySelectorAll('source[data-src]').forEach(function(s){
+        s.src = s.getAttribute('data-src'); s.removeAttribute('data-src');
+      });
+      vid.load();
+    }
+  }
+
+  // When section visible — just play (already preloaded)
+  var visObs = new IntersectionObserver(function(entries){
     entries.forEach(function(entry){
       if(!entry.isIntersecting) return;
       var vid = entry.target;
-      var useSources = function(){
-        vid.querySelectorAll('source[data-src]').forEach(function(x){
-          x.src = x.getAttribute('data-src'); x.removeAttribute('data-src');
-        });
-        vid.load();
-      };
-      var playIt = function(){
-        if(!window.matchMedia('(prefers-reduced-motion:reduce)').matches){
-          vid.play().catch(function(){});
-        }
-      };
-      var hlsUrl = vid.getAttribute('data-hls');
-      var tryHls = function(){
-        if(window.Hls && Hls.isSupported()){
-          var h = new Hls({maxBufferLength:8, startLevel:0});
-          h.loadSource(hlsUrl); h.attachMedia(vid);
-          h.on(Hls.Events.MANIFEST_PARSED, playIt);
-          h.on(Hls.Events.ERROR, function(e,d){
-            if(d.fatal){ h.destroy(); useSources(); playIt(); }
-          });
-        } else if(vid.canPlayType('application/vnd.apple.mpegurl')){
-          vid.src = hlsUrl; vid.load(); playIt();
-        } else { useSources(); playIt(); }
-      };
-      if(hlsUrl){
-        if(window.Hls || vid.canPlayType('application/vnd.apple.mpegurl')){ tryHls(); }
-        else {
-          var waited = false;
-          var t = setTimeout(function(){ waited = true; useSources(); playIt(); }, 2500);
-          var hs = document.querySelector('script[src*="hls.js"]');
-          if(hs) hs.addEventListener('load', function(){ if(!waited){ clearTimeout(t); tryHls(); } });
-        }
-      } else { useSources(); vid.addEventListener('canplay', playIt, {once:true}); playIt(); }
-      videoObs.unobserve(vid);
+      if(vid._hls){
+        vid._hls.on(Hls.Events.MANIFEST_PARSED, function(){ playVid(vid); });
+      }
+      vid.addEventListener('canplay', function(){ playVid(vid); }, {once:true});
+      playVid(vid);
+      visObs.unobserve(vid);
     });
-  },{threshold:0.1, rootMargin:'1200px'});
+  },{threshold:0.05, rootMargin:'50px'});
 
-  // Observe all lazy videos
+  // Start preloading ALL lazy videos immediately on page load
   document.querySelectorAll('.lazy-video').forEach(function(v){
-    videoObs.observe(v);
+    eagerPreload(v);
+    visObs.observe(v);
   });
 
-  // Hero video: load immediately (above fold)
-  var heroVid = document.querySelector('.hero-bg.lazy-video');
-  if(heroVid){
-    var src = heroVid.querySelector('source[data-src]');
-    if(src){ src.src = src.getAttribute('data-src'); src.removeAttribute('data-src'); }
-    heroVid.load();
-    if(!window.matchMedia('(prefers-reduced-motion:reduce)').matches){
-      heroVid.play().catch(function(){});
-    }
-    videoObs.unobserve(heroVid);
-  }
+  // Hero — direct play
+  var hero = document.querySelector('.hero-bg');
+  if(hero && !hero.classList.contains('lazy-video')) playVid(hero);
 })();
 </script>
 <script>
