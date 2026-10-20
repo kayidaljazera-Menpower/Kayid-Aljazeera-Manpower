@@ -829,59 +829,7 @@ h1 span{background:linear-gradient(135deg,var(--gold-3) 0%,var(--gold) 60%);-web
 
 </div><div class="copyright"><span>© <span id="year"></span> Kayid Aljazeera. All rights reserved.</span><span>Professional workforce solutions · Kingdom of Saudi Arabia</span></div></div></footer>
 <a class="floating-wa" id="whatsappLink" href="#contact" aria-label="Contact by WhatsApp">WhatsApp ↗</a>
-<script>
-/* ---- Smart Video Preloader ---- */
-(function(){
-  var reduced = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
 
-  function playVid(vid){
-    if(!reduced) vid.play().catch(function(){});
-  }
-
-  // Preload video immediately (start buffering even before visible)
-  function eagerPreload(vid){
-    vid.preload = 'metadata';
-    var hlsUrl = vid.getAttribute('data-hls');
-    if(hlsUrl && window.Hls && Hls.isSupported()){
-      var h = new Hls({maxBufferLength:20, startLevel:0, autoStartLoad:true});
-      h.loadSource(hlsUrl);
-      h.attachMedia(vid);
-      vid._hls = h;
-    } else if(hlsUrl && vid.canPlayType('application/vnd.apple.mpegurl')){
-      vid.src = hlsUrl; vid.load();
-    } else {
-      vid.querySelectorAll('source[data-src]').forEach(function(s){
-        s.src = s.getAttribute('data-src'); s.removeAttribute('data-src');
-      });
-      vid.load();
-    }
-  }
-
-  // When section visible — just play (already preloaded)
-  var visObs = new IntersectionObserver(function(entries){
-    entries.forEach(function(entry){
-      if(!entry.isIntersecting) return;
-      var vid = entry.target;
-      if(vid._hls){
-        vid._hls.on(Hls.Events.MANIFEST_PARSED, function(){ playVid(vid); });
-      }
-      vid.addEventListener('canplay', function(){ playVid(vid); }, {once:true});
-      playVid(vid);
-      visObs.unobserve(vid);
-    });
-  },{threshold:0.05, rootMargin:'50px'});
-
-  // Start preloading ALL lazy videos immediately on page load
-  document.querySelectorAll('.lazy-video').forEach(function(v){
-    eagerPreload(v);
-    visObs.observe(v);
-  });
-
-  // Hero — direct play
-  var hero = document.querySelector('.hero-bg');
-  if(hero && !hero.classList.contains('lazy-video')) playVid(hero);
-})();
-</script>
 <script>
 // Hero video: start as soon as possible (no waiting for full page load)
 (function(){var v=document.querySelector('video.hero-bg');if(!v)return;
@@ -921,5 +869,15 @@ document.addEventListener('DOMContentLoaded', function(){
     });
   }
 });</script>
+<script>
+// Simple video autoplay - no complexity
+(function(){
+  document.querySelectorAll('video[autoplay]').forEach(function(v){
+    v.muted = true;
+    var p = v.play();
+    if(p && p.catch) p.catch(function(){});
+  });
+})();
+</script>
 </body>
 </html>
