@@ -852,7 +852,7 @@ h1 span{background:linear-gradient(135deg,var(--gold-3) 0%,var(--gold) 60%);-web
 <div class="navdrop"><button type="button" data-i18n="nav-industries">القطاعات ▾</button><div class="dropdown"><a href="#industries" data-i18n="nav-i1">البناء والبنية التحتية</a><a href="#industries" data-i18n="nav-i2">النفط والغاز والطاقة</a><a href="#industries" data-i18n="nav-i3">التصنيع</a><a href="#industries" data-i18n="nav-i4">الرعاية الصحية</a><a href="#industries" data-i18n="nav-i5">الضيافة والخدمات اللوجستية</a></div></div>
 <a href="#process" data-i18n="nav-process">آلية العمل</a><a href="#careers" data-i18n="nav-careers">الوظائف</a><a href="#contact" data-i18n="nav-contact">تواصل معنا</a>
 </nav>
-<button class="lang-toggle" id="langToggle" aria-label="Switch language" title="English / العربية">EN | عر</button><div class="nav-actions"><a class="btn" href="#contact">طلب قوى عاملة ↗</a></div>
+<div class="nav-actions"><a class="btn" href="#contact">طلب قوى عاملة ↗</a></div>
 </div></header>
 <main>
 <section class="hero" id="home">
@@ -1236,5 +1236,29 @@ applyLang(saved);
   });
 })();
 </script>
+<!-- Floating Language Toggle -->
+<button id="langToggle" aria-label="Switch language" style="
+  position:fixed;
+  bottom:80px;
+  left:20px;
+  z-index:9999;
+  background:#c49a42;
+  color:#100e02;
+  border:none;
+  border-radius:50px;
+  padding:11px 20px;
+  font-size:13px;
+  font-weight:800;
+  font-family:'Tajawal','Inter',sans-serif;
+  cursor:pointer;
+  box-shadow:0 4px 20px rgba(196,154,66,.45);
+  letter-spacing:.04em;
+  transition:transform .2s,background .2s;
+  display:flex !important;
+  align-items:center;
+  gap:6px;
+">
+  <span style="font-size:16px">🌐</span> EN | عر
+</button>
 </body>
 </html>
